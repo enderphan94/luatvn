@@ -1,14 +1,14 @@
 {
   "name": "luatvn",
   "owner": {
-    "name": "enderphan94",
-    "url": "https://github.com/enderphan94"
+    "name": "enderphan94"
   },
+  "description": "Plugin tra cứu văn bản pháp luật Việt Nam từ luatvietnam.vn",
   "plugins": [
     {
       "name": "vn-legal-search",
       "source": "./plugins/vn-legal-search",
-      "description": "Tra cứu văn bản pháp luật Việt Nam từ luatvietnam.vn — login tự động, lọc hiệu lực, trích điều khoản, kết nối liên ngành, tìm bản án. Slash command /luat <từ khóa>."
+      "description": "Tra cứu văn bản pháp luật Việt Nam — login tự động, lọc hiệu lực, trích điều khoản, kết nối liên ngành, tìm bản án. Slash command /luat <từ khóa>."
     }
   ]
 }
