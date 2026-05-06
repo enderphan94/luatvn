@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "vn-legal-search",
-      "source": ".",
+      "source": "./plugins/vn-legal-search",
       "description": "Tra cứu văn bản pháp luật Việt Nam từ luatvietnam.vn — login tự động, lọc hiệu lực, trích điều khoản, kết nối liên ngành, tìm bản án. Slash command /luat <từ khóa>."
     }
   ]

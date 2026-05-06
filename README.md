@@ -22,7 +22,7 @@ cd luatvn
 ### Bước 2 — Setup Python venv + dependencies
 
 ```bash
-cd skills/vn-legal-search
+cd plugins/vn-legal-search/skills/vn-legal-search
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
@@ -107,34 +107,30 @@ Pipeline mất ~30-60s/query (rate-limit 1.5s/request × 10 fetches).
 
 ---
 
-## Cấu trúc plugin
+## Cấu trúc repo
 
 ```
-luatvn/                                       ← plugin root
+luatvn/                                       ← repo root = marketplace
 ├── .claude-plugin/
-│   └── plugin.json                          ← Plugin manifest (name, version, ...)
+│   └── marketplace.json                     ← Marketplace catalog
 ├── README.md                                ← File này
 ├── .gitignore
-├── commands/
-│   └── luat.md                              ← Slash command /luat
-└── skills/
-    └── vn-legal-search/                     ← Skill (auto-trigger)
-        ├── SKILL.md                         ← Skill metadata
-        ├── README.md                        ← Tech docs
-        ├── .env / .env.example              ← Credentials
-        ├── requirements.txt
-        ├── auth.py                          ← Login ASP.NET Antiforgery
-        ├── http_util.py                     ← HTTP retry helper
-        ├── search.py                        ← Search statute listing
-        ├── detail.py                        ← Parse detail page + articles
-        ├── ban_an.py                        ← Search bản án/quyết định
-        ├── filter.py                        ← Score + filter hiệu lực
-        ├── analyzer.py                      ← Synonym + domain mapping
-        ├── formatter.py                     ← Markdown output
-        ├── pipeline.py                      ← End-to-end pipeline
-        ├── cli.py                           ← CLI cho /luat command
-        ├── tests/                           ← 53 unit tests
-        └── cache/                           ← Cookies cache (gitignored)
+└── plugins/
+    └── vn-legal-search/                     ← Plugin root
+        ├── .claude-plugin/
+        │   └── plugin.json                  ← Plugin manifest
+        ├── commands/
+        │   └── luat.md                      ← Slash command /luat
+        └── skills/
+            └── vn-legal-search/             ← Skill auto-trigger
+                ├── SKILL.md
+                ├── README.md
+                ├── .env.example             ← Template credentials
+                ├── requirements.txt
+                ├── auth.py, http_util.py, search.py, detail.py, ban_an.py
+                ├── filter.py, analyzer.py, formatter.py, pipeline.py, cli.py
+                ├── tests/                   ← 53 unit tests
+                └── cache/                   ← Cookies (gitignored)
 ```
 
 ---
@@ -169,7 +165,7 @@ Hỏi tự nhiên về luật VN, vd:
 ### Cách 3 — CLI trực tiếp
 
 ```bash
-cd ~/luatvn/skills/vn-legal-search
+cd ~/luatvn/plugins/vn-legal-search/skills/vn-legal-search
 .venv/bin/python cli.py --query "thuế thu nhập cá nhân" \
   --market-meaning "thuế tính trên lương" \
   --legal-meaning "thuế đối với thu nhập chịu thuế" \
@@ -208,7 +204,7 @@ Dev tools (skill dir, prefix `_inspect_`):
 ### Run unit tests
 
 ```bash
-cd skills/vn-legal-search
+cd plugins/vn-legal-search/skills/vn-legal-search
 .venv/bin/python -m unittest discover tests
 ```
 
