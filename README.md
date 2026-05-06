@@ -72,7 +72,7 @@ Output mong đợi:
   .AspNetCore.Antiforgery.* = ...
 === Verify GET / ===
 Status: 200, body length: ...
-Login OK — phát hiện: ['logout', 'thaingocngan', 'Tài khoản']
+Login OK — phát hiện: ['logout', 'tkt', 'Tài khoản']
 ```
 
 Nếu thấy "Login OK" → setup xong, có thể dùng `/luat`.
