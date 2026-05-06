@@ -1,0 +1,33 @@
+# Credentials & cache (KHÔNG BAO GIỜ commit)
+.env
+**/.env
+.claude/**/.env
+**/cache/
+**/cache/*
+*.session
+
+# Python
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.venv/
+**/.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Cache HTML samples (dev only)
+**/cache/*.html
