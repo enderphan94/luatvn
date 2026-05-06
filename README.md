@@ -1,13 +1,14 @@
-# vn-legal-search — Claude Code Plugin
+# luatvn — Skill Tra Cứu Văn Bản Pháp Luật Việt Nam (Standalone)
 
-Plugin tự động tra cứu văn bản pháp luật Việt Nam từ [luatvietnam.vn](https://luatvietnam.vn): đăng nhập, search theo từ khóa thực tế, lọc hiệu lực, trích điều khoản, kết nối liên ngành, tìm bản án.
+Skill tự động tra cứu văn bản pháp luật Việt Nam từ [luatvietnam.vn](https://luatvietnam.vn): đăng nhập, search theo từ khóa thực tế, lọc hiệu lực, trích điều khoản, kết nối liên ngành, tìm bản án.
 
-**Slash command:** `/luat:luat <từ khóa>`
-**Skill:** auto-trigger khi user hỏi về văn bản pháp luật VN
+**Slash command:** `/luat <từ khóa>`
+
+> Cài bằng cách clone repo + dùng `.claude/` của project (không qua plugin marketplace). Đơn giản hơn, work với mọi version Claude Desktop/Claude Code.
 
 ---
 
-## Cài đặt (5 phút)
+## Cài đặt cho đồng nghiệp (5 phút)
 
 ### Bước 1 — Clone repo về `~/luatvn`
 
@@ -17,12 +18,12 @@ git clone https://github.com/enderphan94/luatvn.git
 cd luatvn
 ```
 
-> **Tại sao `~/luatvn`?** Slash command `/luat` mặc định tìm skill ở `$HOME/luatvn`. Nếu clone chỗ khác, phải set `export LUATVN_HOME=<path>` trong `~/.zshrc` hoặc `~/.bashrc`.
+> **Tại sao `~/luatvn`?** Slash command `/luat` mặc định tìm skill ở `$HOME/luatvn/.claude/skills/vn-legal-search`. Nếu clone chỗ khác, set `export LUATVN_HOME=<path>` trong `~/.zshrc` hoặc `~/.bashrc`.
 
 ### Bước 2 — Setup Python venv + dependencies
 
 ```bash
-cd plugins/luat/skills/vn-legal-search
+cd .claude/skills/vn-legal-search
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
@@ -60,7 +61,7 @@ LUATVN_SESSION_TTL=3600
 ### Bước 4 — Test login
 
 ```bash
-# Vẫn ở skills/vn-legal-search/
+# Vẫn ở .claude/skills/vn-legal-search/
 .venv/bin/python auth.py
 ```
 
@@ -73,78 +74,61 @@ Status: 200, body length: ...
 Login OK — phát hiện: ['logout', '<username>', 'Tài khoản']
 ```
 
-### Bước 5 — Cài plugin vào Claude Code
-
-**Cách A — Plugin local (development):**
+### Bước 5 — Mở Claude trong thư mục project
 
 ```bash
-# Mở Claude Code với plugin của bạn
-claude --plugin-dir ~/luatvn
+cd ~/luatvn
+claude  # nếu dùng CLI
+# Hoặc mở Claude Desktop → File → Open Folder → ~/luatvn
 ```
 
-**Cách B — Plugin install vĩnh viễn:**
+Claude Desktop tự động đọc `.claude/commands/` và `.claude/skills/` trong working directory.
 
-Trong Claude Code session, chạy slash command:
-```
-/plugin install ~/luatvn
-```
-
-(Tham khảo doc Claude Code mới nhất nếu cách trên thay đổi: https://code.claude.com/docs/en/plugins)
-
-### Bước 6 — Test
-
-Trong Claude Code, gõ:
+### Bước 6 — Test slash command
 
 ```
-/luat:luat thuế thu nhập cá nhân
-/luat:luat sa thải
-/luat:luat ly hôn đơn phương
-/luat:luat đất thổ cư
-/luat:luat sàn giao dịch tín chỉ carbon
+/luat thuế thu nhập cá nhân
+/luat sa thải
+/luat ly hôn đơn phương
 ```
 
-Pipeline mất ~30-60s/query (rate-limit 1.5s/request × 10 fetches).
+Pipeline mất ~30-60s/query.
 
 ---
 
-## Cấu trúc repo
+## Cấu trúc
 
 ```
-luatvn/                                       ← repo root = marketplace
-├── .claude-plugin/
-│   └── marketplace.json                     ← Marketplace catalog
+luatvn/                                       ← clone repo về đây
 ├── README.md                                ← File này
 ├── .gitignore
-└── plugins/
-    └── vn-legal-search/                     ← Plugin root
-        ├── .claude-plugin/
-        │   └── plugin.json                  ← Plugin manifest
-        ├── commands/
-        │   └── luat.md                      ← Slash command /luat
-        └── skills/
-            └── vn-legal-search/             ← Skill auto-trigger
-                ├── SKILL.md
-                ├── README.md
-                ├── .env.example             ← Template credentials
-                ├── requirements.txt
-                ├── auth.py, http_util.py, search.py, detail.py, ban_an.py
-                ├── filter.py, analyzer.py, formatter.py, pipeline.py, cli.py
-                ├── tests/                   ← 53 unit tests
-                └── cache/                   ← Cookies (gitignored)
+└── .claude/                                 ← Standalone Claude config
+    ├── commands/
+    │   └── luat.md                          ← /luat slash command
+    └── skills/
+        └── vn-legal-search/                 ← Skill auto-trigger
+            ├── SKILL.md
+            ├── README.md (tech doc)
+            ├── .env / .env.example          ← Credentials
+            ├── requirements.txt
+            ├── auth.py, http_util.py, search.py, detail.py, ban_an.py
+            ├── filter.py, analyzer.py, formatter.py, pipeline.py, cli.py
+            ├── tests/                       ← 53 unit tests
+            └── cache/                       ← Cookies (gitignored)
 ```
 
 ---
 
 ## Tính năng
 
-- ✅ **Login tự động** — ASP.NET Antiforgery flow, cache cookies 1 giờ, retry transient errors
+- ✅ **Login tự động** — ASP.NET Antiforgery flow, cache cookies 1 giờ
 - ✅ **Search 16 domains** — thuế / lao động / BHXH / kinh doanh / BĐS / hôn nhân / hình sự / dân sự / SHTT / giáo dục / môi trường / hành chính / TC-NH / giao thông / y tế / XNK
-- ✅ **125+ synonym mappings** + 80+ parent law mappings → query "ly dị" tự expand thành "Luật Hôn nhân và Gia đình"
-- ✅ **Phát hiện hiệu lực thật** — KHÔNG tin filter site (đã verify nhiều lần site trả văn bản đã expire), parse status từ detail page
-- ✅ **Trích điều khoản cụ thể** — query "làm thêm giờ" → BLLĐ 2019 Điều 98 (rate 150%/200%/300%)
-- ✅ **Bản án/quyết định** — tìm phán quyết tòa án thực tế từ `/ban-an/`
-- ✅ **Cross-law mapping** — tự liên kết với Bộ luật khung
-- ✅ **53 unit tests** — cover toàn bộ logic
+- ✅ **125+ synonym mappings** + 80+ parent law mappings
+- ✅ **Phát hiện hiệu lực thật** — KHÔNG tin filter site
+- ✅ **Trích điều khoản cụ thể** — vd. BLLĐ Đ.98 với rate 150/200/300%
+- ✅ **Bản án/quyết định** từ `/ban-an/`
+- ✅ **Cross-law mapping** — tự liên kết Bộ luật khung
+- ✅ **53 unit tests**
 
 ---
 
@@ -153,24 +137,41 @@ luatvn/                                       ← repo root = marketplace
 ### Cách 1 — Slash command
 
 ```
-/luat:luat <từ khóa>
+/luat <từ khóa>
 ```
 
-### Cách 2 — Để Claude tự kích hoạt
+### Cách 2 — Để Claude tự kích hoạt (auto-trigger skill)
 
-Hỏi tự nhiên về luật VN, vd:
+Hỏi tự nhiên về luật VN, Claude tự load skill:
 - "Quy định về làm thêm giờ ở Việt Nam thế nào?"
 - "Luật Bảo hiểm xã hội 2024 có gì mới?"
 
 ### Cách 3 — CLI trực tiếp
 
 ```bash
-cd ~/luatvn/plugins/luat/skills/vn-legal-search
+cd ~/luatvn/.claude/skills/vn-legal-search
 .venv/bin/python cli.py --query "thuế thu nhập cá nhân" \
   --market-meaning "thuế tính trên lương" \
   --legal-meaning "thuế đối với thu nhập chịu thuế" \
   --max-fetch 10 --quiet
 ```
+
+---
+
+## Update khi có code mới
+
+Đồng nghiệp pull về:
+
+```bash
+cd ~/luatvn
+git pull origin main
+
+# Cài deps mới (nếu requirements.txt đổi)
+cd .claude/skills/vn-legal-search
+.venv/bin/pip install -r requirements.txt
+```
+
+`.env` và `.venv` không bị wipe (gitignored).
 
 ---
 
@@ -187,24 +188,15 @@ Tạo issue / PR với 4 thông tin:
 4. Từ đồng nghĩa:        ["sổ hộ khẩu", "đăng ký thường trú", ...]
 ```
 
-Sửa [`skills/vn-legal-search/analyzer.py`](skills/vn-legal-search/analyzer.py) ở 3 chỗ:
+Sửa [`.claude/skills/vn-legal-search/analyzer.py`](.claude/skills/vn-legal-search/analyzer.py) ở 3 dict:
 - `SYNONYM_MAPPING` — mở rộng query
 - `PARENT_LAW_MAPPING` — trỏ Luật gốc
 - `_DOMAIN_KEYWORDS[<domain>]` — detect domain
 
-### Khi luatvietnam.vn đổi cấu trúc HTML
-
-Dev tools (skill dir, prefix `_inspect_`):
-- `_inspect_search.py` — dump search listing
-- `_inspect_detail.py` — dump detail page
-- `_inspect_content.py` — dump nội dung điều khoản
-- `_inspect_banan.py` — dump bản án page
-- `_test_bypass_filter.py` — test EffectStatusIds=0 strategy
-
 ### Run unit tests
 
 ```bash
-cd plugins/luat/skills/vn-legal-search
+cd .claude/skills/vn-legal-search
 .venv/bin/python -m unittest discover tests
 ```
 
@@ -215,7 +207,7 @@ cd plugins/luat/skills/vn-legal-search
 - **KHÔNG commit `.env`** — `git status` check trước khi push
 - **KHÔNG share password** trong issue/PR/Slack
 - **KHÔNG hardcode credentials** trong Python code
-- Cookies cache 1 giờ trong `cache/.session` — auto-expire, đừng share
+- Cookies cache 1 giờ trong `cache/.session` — auto-expire
 
 ---
 
@@ -226,8 +218,7 @@ cd plugins/luat/skills/vn-legal-search
 - [x] Phase 3 — article extraction + 60+ synonyms
 - [x] Phase 4 — bản án + 53 unit tests + retry + stale session
 - [x] Phase 5 — public git + Vietnamese setup guide
-- [x] Phase 6 — Claude Code plugin format (`.claude-plugin/plugin.json`)
-- [ ] Phase 7 — submit lên Claude Code marketplace (khi có)
+- [~] Phase 6 — Claude Code plugin format (revert do compat issues với Claude Desktop)
 
 ---
 

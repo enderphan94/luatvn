@@ -17,13 +17,12 @@ Hai chuỗi này sẽ được truyền vào pipeline để hiện trong output 
 
 ### Bước 2 — Chạy pipeline + PASTE KẾT QUẢ
 
-Dùng Bash chạy CLI. Plugin tìm skill dir theo thứ tự: `$CLAUDE_PLUGIN_ROOT` (tự inject khi installed via plugin marketplace) → `$LUATVN_HOME` → `~/luatvn` → glob fallback:
+Skill ở `.claude/skills/vn-legal-search/`. Tìm path qua env var hoặc fallback:
 
 ```bash
-SKILL=""
-[ -n "$CLAUDE_PLUGIN_ROOT" ] && SKILL="$CLAUDE_PLUGIN_ROOT/skills/vn-legal-search"
-[ -z "$SKILL" ] || [ ! -d "$SKILL" ] && SKILL="${LUATVN_HOME:-$HOME/luatvn}/plugins/luat/skills/vn-legal-search"
-[ ! -d "$SKILL" ] && SKILL=$(find "$HOME" -path '*vn-legal-search/cli.py' -type f 2>/dev/null | head -1 | xargs dirname)
+# Tìm skill dir: $LUATVN_HOME → ~/luatvn → glob fallback
+SKILL="${LUATVN_HOME:-$HOME/luatvn}/.claude/skills/vn-legal-search"
+[ ! -d "$SKILL" ] && SKILL=$(find "$HOME" -path '*/.claude/skills/vn-legal-search/cli.py' -type f 2>/dev/null | head -1 | xargs dirname)
 "$SKILL/.venv/bin/python" "$SKILL/cli.py" \
   --query "$ARGUMENTS" \
   --market-meaning "<nghĩa thực tế Bước 1>" \
@@ -35,7 +34,7 @@ SKILL=""
 
 Lưu ý:
 - Pipeline mất 30-60s (rate-limit 1.5s/request × ~10 fetches)
-- Nếu lỗi `command not found` hoặc `No such file`: user chưa setup plugin. Nói: clone repo về `~/luatvn`, chạy `cd ~/luatvn/skills/vn-legal-search && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && cp .env.example .env && nano .env`
+- Nếu lỗi `command not found` hoặc `No such file`: user chưa setup. Nói: clone repo về `~/luatvn`, chạy `cd ~/luatvn/.claude/skills/vn-legal-search && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && cp .env.example .env && nano .env`
 - Nếu output có 0 kết quả ở mọi nhóm: thử lại với keyword cụ thể hơn
 
 ### Bước 3 — Đọc kết quả + viết kết luận
@@ -55,4 +54,4 @@ In kết luận sau output pipeline.
 - ✅ NẾU pipeline trả 0 kết quả ở mọi nhóm: thông báo user thử query khác hoặc cụ thể hơn
 - ✅ NẾU mạng/login lỗi: kiểm tra `.env` và `cache/.session` — gợi ý xoá cache để re-login
 
-Tham chiếu chi tiết skill: [skills/vn-legal-search/SKILL.md](../skills/vn-legal-search/SKILL.md)
+Tham chiếu chi tiết skill: [.claude/skills/vn-legal-search/SKILL.md](../skills/vn-legal-search/SKILL.md)
