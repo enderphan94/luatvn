@@ -1,7 +1,6 @@
 # Credentials & cache (KHÔNG BAO GIỜ commit)
 .env
 **/.env
-.claude/**/.env
 **/cache/
 **/cache/*
 *.session
@@ -16,6 +15,10 @@ __pycache__/
 venv/
 env/
 
+# Claude Code local config (per-user, not part of plugin)
+.claude/settings.local.json
+.claude/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -29,5 +32,5 @@ Thumbs.db
 # Logs
 *.log
 
-# Cache HTML samples (dev only)
+# HTML samples (dev cache)
 **/cache/*.html

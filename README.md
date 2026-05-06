@@ -1,45 +1,44 @@
-# luatvn — Skill Tra Cứu Văn Bản Pháp Luật Việt Nam
+# vn-legal-search — Claude Code Plugin
 
-Claude Code skill tự động tra cứu văn bản pháp luật Việt Nam từ [luatvietnam.vn](https://luatvietnam.vn): đăng nhập, search theo từ khóa thực tế, lọc hiệu lực, trích điều khoản cụ thể, kết nối liên ngành, và tìm bản án liên quan.
+Plugin tự động tra cứu văn bản pháp luật Việt Nam từ [luatvietnam.vn](https://luatvietnam.vn): đăng nhập, search theo từ khóa thực tế, lọc hiệu lực, trích điều khoản, kết nối liên ngành, tìm bản án.
 
-Slash command: `/luat <từ khóa>`
+**Slash command:** `/luat <từ khóa>`
+**Skill:** auto-trigger khi user hỏi về văn bản pháp luật VN
 
 ---
 
-## Cài đặt cho đồng nghiệp mới (5 phút)
+## Cài đặt (5 phút)
 
-### Bước 1 — Clone repo
+### Bước 1 — Clone repo về `~/luatvn`
 
 ```bash
-cd ~  # hoặc chỗ nào bạn muốn lưu project
+cd ~
 git clone https://github.com/enderphan94/luatvn.git
 cd luatvn
 ```
 
-### Bước 2 — Tạo venv + cài Python deps
+> **Tại sao `~/luatvn`?** Slash command `/luat` mặc định tìm skill ở `$HOME/luatvn`. Nếu clone chỗ khác, phải set `export LUATVN_HOME=<path>` trong `~/.zshrc` hoặc `~/.bashrc`.
+
+### Bước 2 — Setup Python venv + dependencies
 
 ```bash
-cd .claude/skills/vn-legal-search
-
-# Tạo venv riêng (không chung với system Python)
+cd skills/vn-legal-search
 python3 -m venv .venv
-
-# Cài dependencies
 .venv/bin/pip install -r requirements.txt
 ```
 
-Yêu cầu: Python 3.9+ (đã test với 3.9 và 3.12).
+Yêu cầu Python 3.9+.
 
-### Bước 3 — Tạo file `.env` với tài khoản luatvietnam.vn của bạn
+### Bước 3 — Tạo `.env` với tài khoản luatvietnam.vn
 
-**QUAN TRỌNG:** mỗi người dùng tài khoản RIÊNG, không share.
+**Mỗi người dùng tài khoản RIÊNG, KHÔNG share.**
 
 ```bash
-# Vẫn ở trong .claude/skills/vn-legal-search/
 cp .env.example .env
+nano .env  # hoặc code .env / vim .env
 ```
 
-Mở `.env` bằng editor (vd. `nano .env` hoặc VSCode), điền 3 dòng:
+Điền vào:
 
 ```ini
 LUATVN_USERNAME=email_của_bạn@example.com
@@ -47,21 +46,21 @@ LUATVN_PASSWORD=mật_khẩu_của_bạn
 LUATVN_SESSION_TTL=3600
 ```
 
-**Tạo tài khoản nếu chưa có:**
+**Tạo tài khoản luatvietnam.vn:**
 1. Truy cập https://luatvietnam.vn
-2. Bấm "Đăng ký" góc phải trên
+2. Bấm "Đăng ký" góc phải
 3. Verify email
-4. Tài khoản free có giới hạn — gói trả phí mới đọc được full nội dung văn bản
+4. Free có giới hạn — gói trả phí mới đọc full nội dung văn bản
 
-**Lưu ý bảo mật:**
-- File `.env` đã trong `.gitignore` → KHÔNG bao giờ bị commit lên git
-- Password lưu plaintext local — chỉ trên máy bạn, không upload đâu cả
-- Nếu lộ tài khoản: đổi mật khẩu trên luatvietnam.vn, sửa lại file `.env`, xoá `cache/.session`
+**Bảo mật:**
+- File `.env` đã trong `.gitignore` → KHÔNG commit lên git
+- Plaintext local-only — không upload đâu
+- Đổi password trên luatvietnam.vn → cập nhật `.env` → xoá `cache/.session`
 
-### Bước 4 — Test
+### Bước 4 — Test login
 
 ```bash
-# Vẫn ở .claude/skills/vn-legal-search/
+# Vẫn ở skills/vn-legal-search/
 .venv/bin/python auth.py
 ```
 
@@ -69,101 +68,108 @@ Output mong đợi:
 ```
 === Cookies sau khi login ===
   .LuatVietNamSSO = ...
-  .AspNetCore.Antiforgery.* = ...
 === Verify GET / ===
 Status: 200, body length: ...
-Login OK — phát hiện: ['logout', 'tkt', 'Tài khoản']
+Login OK — phát hiện: ['logout', '<username>', 'Tài khoản']
 ```
 
-Nếu thấy "Login OK" → setup xong, có thể dùng `/luat`.
+### Bước 5 — Cài plugin vào Claude Code
 
-Nếu thấy lỗi:
-- `Đăng nhập thất bại (HTTP 401)` → kiểm tra lại username/password trong `.env`
-- `Không tìm thấy credentials` → file `.env` chưa tồn tại hoặc sai tên biến
-- Network error → kiểm tra kết nối internet
-
-### Bước 5 — Restart Claude Code để load slash command
+**Cách A — Plugin local (development):**
 
 ```bash
-# Quit Claude Code hoàn toàn rồi mở lại tại thư mục project
-cd ~/luatvn  # nếu bạn clone vào ~
-claude  # hoặc dùng UI app
+# Mở Claude Code với plugin của bạn
+claude --plugin-dir ~/luatvn
 ```
 
-Gõ `/luat <từ khóa>` để test:
+**Cách B — Plugin install vĩnh viễn:**
+
+Trong Claude Code session, chạy slash command:
+```
+/plugin install ~/luatvn
+```
+
+(Tham khảo doc Claude Code mới nhất nếu cách trên thay đổi: https://code.claude.com/docs/en/plugins)
+
+### Bước 6 — Test
+
+Trong Claude Code, gõ:
 
 ```
 /luat thuế thu nhập cá nhân
 /luat sa thải
 /luat ly hôn đơn phương
 /luat đất thổ cư
+/luat sàn giao dịch tín chỉ carbon
+```
+
+Pipeline mất ~30-60s/query (rate-limit 1.5s/request × 10 fetches).
+
+---
+
+## Cấu trúc plugin
+
+```
+luatvn/                                       ← plugin root
+├── .claude-plugin/
+│   └── plugin.json                          ← Plugin manifest (name, version, ...)
+├── README.md                                ← File này
+├── .gitignore
+├── commands/
+│   └── luat.md                              ← Slash command /luat
+└── skills/
+    └── vn-legal-search/                     ← Skill (auto-trigger)
+        ├── SKILL.md                         ← Skill metadata
+        ├── README.md                        ← Tech docs
+        ├── .env / .env.example              ← Credentials
+        ├── requirements.txt
+        ├── auth.py                          ← Login ASP.NET Antiforgery
+        ├── http_util.py                     ← HTTP retry helper
+        ├── search.py                        ← Search statute listing
+        ├── detail.py                        ← Parse detail page + articles
+        ├── ban_an.py                        ← Search bản án/quyết định
+        ├── filter.py                        ← Score + filter hiệu lực
+        ├── analyzer.py                      ← Synonym + domain mapping
+        ├── formatter.py                     ← Markdown output
+        ├── pipeline.py                      ← End-to-end pipeline
+        ├── cli.py                           ← CLI cho /luat command
+        ├── tests/                           ← 53 unit tests
+        └── cache/                           ← Cookies cache (gitignored)
 ```
 
 ---
 
-## Cấu trúc project
+## Tính năng
 
-```
-luatvn/
-├── README.md                              ← File này
-├── .gitignore                             ← Block .env, .venv, cache
-└── .claude/
-    ├── commands/
-    │   └── luat.md                        ← Slash command /luat
-    └── skills/
-        └── vn-legal-search/
-            ├── SKILL.md                   ← Skill metadata (auto-trigger)
-            ├── README.md                  ← Tech doc của skill
-            ├── .env.example               ← Template credentials
-            ├── .env                       ← Credentials thật (gitignored)
-            ├── requirements.txt           ← Python deps
-            ├── auth.py                    ← Login (ASP.NET Antiforgery)
-            ├── http_util.py               ← HTTP retry helper
-            ├── search.py                  ← Search statute listing
-            ├── detail.py                  ← Parse detail page + articles
-            ├── ban_an.py                  ← Search bản án/quyết định
-            ├── filter.py                  ← Score + filter by hiệu lực
-            ├── analyzer.py                ← Synonym + domain mapping
-            ├── formatter.py               ← Markdown output
-            ├── pipeline.py                ← End-to-end pipeline
-            ├── cli.py                     ← CLI cho /luat command
-            ├── tests/                     ← 53 unit tests
-            ├── cache/                     ← Cookies cache (gitignored)
-            └── .venv/                     ← venv (gitignored)
-```
+- ✅ **Login tự động** — ASP.NET Antiforgery flow, cache cookies 1 giờ, retry transient errors
+- ✅ **Search 16 domains** — thuế / lao động / BHXH / kinh doanh / BĐS / hôn nhân / hình sự / dân sự / SHTT / giáo dục / môi trường / hành chính / TC-NH / giao thông / y tế / XNK
+- ✅ **125+ synonym mappings** + 80+ parent law mappings → query "ly dị" tự expand thành "Luật Hôn nhân và Gia đình"
+- ✅ **Phát hiện hiệu lực thật** — KHÔNG tin filter site (đã verify nhiều lần site trả văn bản đã expire), parse status từ detail page
+- ✅ **Trích điều khoản cụ thể** — query "làm thêm giờ" → BLLĐ 2019 Điều 98 (rate 150%/200%/300%)
+- ✅ **Bản án/quyết định** — tìm phán quyết tòa án thực tế từ `/ban-an/`
+- ✅ **Cross-law mapping** — tự liên kết với Bộ luật khung
+- ✅ **53 unit tests** — cover toàn bộ logic
 
 ---
 
 ## Sử dụng
 
-### Cách 1: Dùng slash command `/luat`
+### Cách 1 — Slash command
 
-Trong Claude Code, gõ:
 ```
-/luat <từ khóa cần tìm>
+/luat <từ khóa>
 ```
 
-Ví dụ:
-- `/luat thuế thu nhập cá nhân`
-- `/luat hợp đồng lao động sa thải`
-- `/luat sàn giao dịch tín chỉ carbon`
-- `/luat đăng ký hộ khẩu`
-- `/luat tranh chấp đất đai`
+### Cách 2 — Để Claude tự kích hoạt
 
-Pipeline mất ~30-60s/query (rate-limit 1.5s/request × ~10 fetches).
-
-### Cách 2: Để Claude tự kích hoạt skill
-
-Hỏi Claude bình thường về văn bản pháp luật VN, vd.:
+Hỏi tự nhiên về luật VN, vd:
 - "Quy định về làm thêm giờ ở Việt Nam thế nào?"
 - "Luật Bảo hiểm xã hội 2024 có gì mới?"
 
-Claude sẽ tự load skill `vn-legal-search` (đã đăng ký với mô tả phù hợp).
-
-### Cách 3: CLI trực tiếp
+### Cách 3 — CLI trực tiếp
 
 ```bash
-cd .claude/skills/vn-legal-search
+cd ~/luatvn/skills/vn-legal-search
 .venv/bin/python cli.py --query "thuế thu nhập cá nhân" \
   --market-meaning "thuế tính trên lương" \
   --legal-meaning "thuế đối với thu nhập chịu thuế" \
@@ -172,67 +178,48 @@ cd .claude/skills/vn-legal-search
 
 ---
 
-## Tính năng
-
-- ✅ Đăng nhập tự động (ASP.NET Antiforgery flow), cache cookies 1 giờ
-- ✅ Search × 4 keyword × 3 trạng thái hiệu lực, dedup, retry HTTP transient errors
-- ✅ Parse đầy đủ metadata: ngày ban hành / áp dụng / hết hạn, người ký, cơ quan, lĩnh vực
-- ✅ Phát hiện chính xác trạng thái hiệu lực thật (KHÔNG tin filter site, đã verify nhiều lần site filter sai)
-- ✅ Trích điều khoản cụ thể (Điều 98 Bộ luật Lao động về tiền lương làm thêm giờ, ...)
-- ✅ 16 domains: thuế / lao động / BHXH / kinh doanh / BĐS / hôn nhân / hình sự / dân sự / SHTT / giáo dục / môi trường / hành chính / TC-NH / giao thông / y tế / XNK
-- ✅ 125+ synonym mappings, 80+ parent law mappings
-- ✅ Tìm bản án/quyết định/án lệ liên quan từ section `/ban-an/`
-- ✅ Cross-law mapping: tự động liên kết Bộ luật khung cho mỗi lĩnh vực
-- ✅ 53 unit tests cover toàn bộ logic (filter / detail / analyzer / ban_an)
-
----
-
 ## Đóng góp
 
-### Khi gặp query bị "miss synonym" (ra kết quả sai)
+### Khi gặp query "miss synonym" (ra kết quả sai)
 
-Tạo issue hoặc PR với 4 thông tin:
+Tạo issue / PR với 4 thông tin:
 
 ```
-1. Query thực tế:        vd. "đăng ký hộ khẩu"
-2. Tên Luật/Bộ luật gốc: vd. "Luật Cư trú"
-3. Domain phù hợp:       hành chính / lao động / dân sự / ... (16 domains)
-4. Từ đồng nghĩa:        vd. ["sổ hộ khẩu", "đăng ký thường trú", ...]
+1. Query thực tế:        "đăng ký hộ khẩu"
+2. Tên Luật/Bộ luật gốc: "Luật Cư trú"
+3. Domain phù hợp:       hành chính (1 trong 16 domains)
+4. Từ đồng nghĩa:        ["sổ hộ khẩu", "đăng ký thường trú", ...]
 ```
 
-Sửa file [`.claude/skills/vn-legal-search/analyzer.py`](.claude/skills/vn-legal-search/analyzer.py) ở 3 chỗ:
+Sửa [`skills/vn-legal-search/analyzer.py`](skills/vn-legal-search/analyzer.py) ở 3 chỗ:
 - `SYNONYM_MAPPING` — mở rộng query
-- `PARENT_LAW_MAPPING` — trỏ về Luật gốc
-- `_DOMAIN_KEYWORDS[<domain>]` — thêm keyword detect domain
+- `PARENT_LAW_MAPPING` — trỏ Luật gốc
+- `_DOMAIN_KEYWORDS[<domain>]` — detect domain
 
-### Khi site luatvietnam.vn đổi cấu trúc HTML
+### Khi luatvietnam.vn đổi cấu trúc HTML
 
-Dev tools có sẵn (đã trong skill dir, file prefix `_inspect_*.py`):
-- `_inspect_search.py` — dump HTML trang search listing
-- `_inspect_detail.py` — dump HTML trang detail
-- `_inspect_content.py` — dump HTML phần nội dung điều khoản
-- `_inspect_banan.py` — dump HTML trang bản án
+Dev tools (skill dir, prefix `_inspect_`):
+- `_inspect_search.py` — dump search listing
+- `_inspect_detail.py` — dump detail page
+- `_inspect_content.py` — dump nội dung điều khoản
+- `_inspect_banan.py` — dump bản án page
 - `_test_bypass_filter.py` — test EffectStatusIds=0 strategy
 
-Chạy để xem HTML mới, rồi sửa selector trong file tương ứng (`search.py`, `detail.py`, `ban_an.py`).
-
-### Chạy unit tests
+### Run unit tests
 
 ```bash
-cd .claude/skills/vn-legal-search
+cd skills/vn-legal-search
 .venv/bin/python -m unittest discover tests
 ```
 
-53 tests, expect ~5ms total.
-
 ---
 
-## Cảnh báo bảo mật
+## Bảo mật
 
-- **KHÔNG commit `.env`** — đã có trong `.gitignore` nhưng luôn check `git status` trước khi push
-- **KHÔNG share password** trong issue / PR / Slack — mỗi người tài khoản riêng
-- **KHÔNG hardcode credentials** trong file Python nào
-- Token cookies cache 1 giờ trong `cache/.session` — auto-expire, đừng share file này
+- **KHÔNG commit `.env`** — `git status` check trước khi push
+- **KHÔNG share password** trong issue/PR/Slack
+- **KHÔNG hardcode credentials** trong Python code
+- Cookies cache 1 giờ trong `cache/.session` — auto-expire, đừng share
 
 ---
 
@@ -240,16 +227,17 @@ cd .claude/skills/vn-legal-search
 
 - [x] Phase 1 — auth + search listing
 - [x] Phase 2 — detail parser + filter + cross-law + pipeline
-- [x] Phase 3 — article extraction + scoring + 60+ synonym mappings
-- [x] Phase 4 — bản án + unit tests + HTTP retry + stale session recovery
-- [x] Phase 5 — public git repo + Vietnamese setup guide
-- [ ] Phase 6 — đóng gói thành Claude Code plugin chuẩn (`.claude-plugin/plugin.json`)
+- [x] Phase 3 — article extraction + 60+ synonyms
+- [x] Phase 4 — bản án + 53 unit tests + retry + stale session
+- [x] Phase 5 — public git + Vietnamese setup guide
+- [x] Phase 6 — Claude Code plugin format (`.claude-plugin/plugin.json`)
+- [ ] Phase 7 — submit lên Claude Code marketplace (khi có)
 
 ---
 
 ## License
 
-MIT (hoặc tuỳ tác giả enderphan94 quyết định).
+MIT
 
 ## Tác giả
 
