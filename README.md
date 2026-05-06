@@ -2,7 +2,7 @@
 
 Plugin tự động tra cứu văn bản pháp luật Việt Nam từ [luatvietnam.vn](https://luatvietnam.vn): đăng nhập, search theo từ khóa thực tế, lọc hiệu lực, trích điều khoản, kết nối liên ngành, tìm bản án.
 
-**Slash command:** `/luat <từ khóa>`
+**Slash command:** `/luat:luat <từ khóa>`
 **Skill:** auto-trigger khi user hỏi về văn bản pháp luật VN
 
 ---
@@ -22,7 +22,7 @@ cd luatvn
 ### Bước 2 — Setup Python venv + dependencies
 
 ```bash
-cd plugins/vn-legal-search/skills/vn-legal-search
+cd plugins/luat/skills/vn-legal-search
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
@@ -96,11 +96,11 @@ Trong Claude Code session, chạy slash command:
 Trong Claude Code, gõ:
 
 ```
-/luat thuế thu nhập cá nhân
-/luat sa thải
-/luat ly hôn đơn phương
-/luat đất thổ cư
-/luat sàn giao dịch tín chỉ carbon
+/luat:luat thuế thu nhập cá nhân
+/luat:luat sa thải
+/luat:luat ly hôn đơn phương
+/luat:luat đất thổ cư
+/luat:luat sàn giao dịch tín chỉ carbon
 ```
 
 Pipeline mất ~30-60s/query (rate-limit 1.5s/request × 10 fetches).
@@ -153,7 +153,7 @@ luatvn/                                       ← repo root = marketplace
 ### Cách 1 — Slash command
 
 ```
-/luat <từ khóa>
+/luat:luat <từ khóa>
 ```
 
 ### Cách 2 — Để Claude tự kích hoạt
@@ -165,7 +165,7 @@ Hỏi tự nhiên về luật VN, vd:
 ### Cách 3 — CLI trực tiếp
 
 ```bash
-cd ~/luatvn/plugins/vn-legal-search/skills/vn-legal-search
+cd ~/luatvn/plugins/luat/skills/vn-legal-search
 .venv/bin/python cli.py --query "thuế thu nhập cá nhân" \
   --market-meaning "thuế tính trên lương" \
   --legal-meaning "thuế đối với thu nhập chịu thuế" \
@@ -204,7 +204,7 @@ Dev tools (skill dir, prefix `_inspect_`):
 ### Run unit tests
 
 ```bash
-cd plugins/vn-legal-search/skills/vn-legal-search
+cd plugins/luat/skills/vn-legal-search
 .venv/bin/python -m unittest discover tests
 ```
 

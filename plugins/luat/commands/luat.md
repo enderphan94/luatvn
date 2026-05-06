@@ -22,7 +22,7 @@ Dùng Bash chạy CLI. Plugin tìm skill dir theo thứ tự: `$CLAUDE_PLUGIN_RO
 ```bash
 SKILL=""
 [ -n "$CLAUDE_PLUGIN_ROOT" ] && SKILL="$CLAUDE_PLUGIN_ROOT/skills/vn-legal-search"
-[ -z "$SKILL" ] || [ ! -d "$SKILL" ] && SKILL="${LUATVN_HOME:-$HOME/luatvn}/plugins/vn-legal-search/skills/vn-legal-search"
+[ -z "$SKILL" ] || [ ! -d "$SKILL" ] && SKILL="${LUATVN_HOME:-$HOME/luatvn}/plugins/luat/skills/vn-legal-search"
 [ ! -d "$SKILL" ] && SKILL=$(find "$HOME" -path '*vn-legal-search/cli.py' -type f 2>/dev/null | head -1 | xargs dirname)
 "$SKILL/.venv/bin/python" "$SKILL/cli.py" \
   --query "$ARGUMENTS" \
